@@ -11,23 +11,22 @@ exports.authMiddleware = async (req, res, next) => {
             message: "invalid token"
         })
     }
-    let decoded
     try {
+        let decoded
         decoded = jwt.verify(token, process.env.JWT_ACCESS_TOKEN)
+        const currentUser = await User.findByPk(decoded.id)
+        if (!currentUser) {
+            return res.status(401).json({
+                message: "anda belum login"
+            })
+        }
+        req.user = currentUser
+        next()
     } catch (error) {
-        return res.status(401).json({
-            message: "Token invalid atau expired token"
+        return res.status(400).json({
+            message: error.stack
         })
     }
-    const currentUser = await User.findByPk(decoded.user.id)
-    if (!currentUser) {
-        return next(res.status(401).json({
-            message: "anda belum login"
-        }))
-    }
-
-    req.user = currentUser
-    next()
 }
 
 exports.permissionRole = (...roles) => {
@@ -48,11 +47,8 @@ exports.permissionRole = (...roles) => {
                     message: "Anda tidak memiliki akses"
                 });
             }
-
-
             next();
         } catch (error) {
-
             return res.status(500).json({
                 message: "Internal server error",
                 error: error.message
