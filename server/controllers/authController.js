@@ -4,65 +4,78 @@ const jwt = require("jsonwebtoken")
 
 
 const accessToken = (user) => {
-    return jwt.sign({ user }, process.env.JWT_ACCESS_TOKEN, {
+    return jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN, {
         expiresIn: "7d"
     })
 }
 
 exports.register = async (req, res) => {
     try {
-        const addUser = await User.create({
-            username: req.body.username,
-            email: req.body.email,
-            address: req.body.address,
-            age: req.body.age,
-            password: req.body.password,
-            confirmPassword: req.body.confirmPassword
-        })
-        const existingUser = await User.findOne({
-            where: {
-                email: req.body.email
-            }
-        })
-        if (req.body.password !== req.body.confirmPassword) {
-            return res.status(400).json({
-                message: "Password dan Confirm Password Tidak Sama"
-            })
-        }
-        if (existingUser === existingUser.email) {
+        const { username, email, address, age, password, confirmPassword } = req.body;
+
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
             return res.status(400).json({
                 message: "Email Sudah Terdaftar"
-            })
+            });
         }
-        return res.status(200).json({
+        if (password !== confirmPassword) {
+            return res.status(400).json({
+                message: "Password dan Confirm Password Tidak Sama"
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const addUser = await User.create({
+            username,
+            email,
+            address,
+            age,
+            password: hashedPassword,
+        });
+
+        return res.status(201).json({
             message: "Register Berhasil",
             data: addUser
-        })
+        });
     } catch (error) {
         return res.status(500).json({
             message: "Gagal Register User",
             error: error.message
-        })
+        });
     }
-}
+};
+
 
 exports.login = async (req, res) => {
     try {
-        const userData = await User.findOne({
-            where: { email: req.body.email }
-        });
+        const { email, password } = req.body;
 
-        if (!userData || !(await bcrypt.compare(req.body.password, userData.password))) {
+        const userData = await User.findOne({ where: { email } });
+        if (!userData) {
             return res.status(400).json({
                 message: "Email atau Password Salah"
             });
         }
-        userData.password = undefined;
+
+        const isPasswordCorrect = await bcrypt.compare(password, userData.password);
+        if (!isPasswordCorrect) {
+            return res.status(400).json({
+                message: "Email atau Password Salah"
+            });
+        }
+
         const token = accessToken(userData);
+
         return res.status(200).json({
             message: "Login Berhasil",
             user: {
-                userData
+                id: userData.id,
+                username: userData.username,
+                email: userData.email,
+                address: userData.address,
+                age: userData.age
             },
             accessToken: token
         });
@@ -73,6 +86,7 @@ exports.login = async (req, res) => {
         });
     }
 };
+
 
 exports.currentUser = async (req, res) => {
     try {
