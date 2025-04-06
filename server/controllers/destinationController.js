@@ -1,4 +1,4 @@
-const { where } = require("sequelize");
+const { Op } = require("sequelize")
 const { daftar_tempat } = require("../models")
 const cloudinary = require("cloudinary").v2
 const streamifier = require("streamifier")
@@ -33,7 +33,6 @@ async function getPublicId(id) {
     const getPublicId = `${ getDestination }/${ getId }`
     return getPublicId
 }
-
 
 exports.createDestination = async (req, res) => {
     try {
@@ -73,6 +72,11 @@ exports.deleteDestination = async (req, res) => {
             })
         }
         const publicId = await getPublicId(id)
+        if (!publicId) {
+            return res.status(400).json({
+                message: "public id tidak ditemukan"
+            })
+        }
 
         cloudinary.uploader.destroy(publicId, (error, result) => {
             if (error) {
@@ -101,18 +105,62 @@ exports.deleteDestination = async (req, res) => {
     }
 }
 
-exports.getAllDestination = async (req, res) => {
+exports.getDestination = async (req, res) => {
     try {
-        const allDestination = await daftar_tempat.findAll()
-        return res.status(200).json({
-            message: "Get all destination Success",
-            data: allDestination
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 4
+        const search = req.query.search || ""
+        const offset = (page - 1) * limit
+
+        const notExistTempatNama = await daftar_tempat.findOne({
+            where: {
+                tempat_nama: {
+                    [Op.like]: `%${ search }%`
+                }
+            }
         })
+        if (!notExistTempatNama) {
+            return res.status(400).json({
+                message: "Tempat destinasi tidak ditemukan"
+            })
+        }
+
+        if (search) {
+            const getDestinationBySearch = await daftar_tempat.findAll({
+                where: {
+                    tempat_nama: {
+                        [Op.like]: `%${ search }%`
+                    }
+                }
+            })
+            res.status(200).json({
+                message: "Search destination Success",
+                limit: 0,
+                page: 0,
+                data: getDestinationBySearch
+            })
+        }
+        if (!search) {
+            const getPaginateData = await daftar_tempat.findAll({
+                limit,
+                offset,
+                order: [
+                    ['tempat_id', 'ASC']
+                ]
+            })
+            return res.status(200).json({
+                message: "Get all destination Success",
+                limit,
+                page,
+                data: getPaginateData
+            })
+        }
     } catch (error) {
         return res.status(500).json({
-            message: error.stack
+            message: error.message
         })
     }
+
 }
 
 exports.updateDestination = async (req, res) => {
