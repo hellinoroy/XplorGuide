@@ -45,14 +45,7 @@ exports.addRating = async (req, res) => {
                 message: "user_id, tempat_id, dan rating harus disertakan",
             })
         }
-        const existingRating = await ratings.findOne({
-            where: { user_id, tempat_id },
-        })
-        if (existingRating) {
-            return res.status(409).json({
-                message: "Rating sudah ada untuk pengguna dan tempat ini",
-            })
-        }
+
         const createRating = await ratings.create({
             user_id,
             tempat_id,

@@ -5,10 +5,10 @@ const bodyParser = require("body-parser")
 const cors = require("cors")
 const helmet = require("helmet")
 const dotenv = require("dotenv")
+const { updateRatingOtomatis, updateBookmarksOtomatis } = require("./utils/automatedQuery.js")
 dotenv.config()
 
 const cloudinary = require('cloudinary').v2;
-
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -21,6 +21,8 @@ const roleRoute = require("./routes/role")
 const destinationRoute = require("./routes/destination")
 const userRoute = require("./routes/user")
 
+updateRatingOtomatis()
+updateBookmarksOtomatis()
 app.use(cors())
 app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: true }))
