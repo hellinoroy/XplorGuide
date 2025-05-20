@@ -37,8 +37,15 @@ async function getPublicId(id) {
 exports.createDestination = async (req, res) => {
     try {
         const { tempat_nama, tempat_deskripsi, tempat_kategori, tempat_kota, tempat_rating, tempat_harga, tempat_lat, tempat_long, tempat_updateTerakhir, tempat_bookmark } = req.body
-        const tempat_foto = req.file
-        const uploadImg = await uploadToCloudinary(tempat_foto)
+
+
+        if (req.file) {
+            const tempat_foto = req.file
+            const uploadImg = await uploadToCloudinary(tempat_foto)
+        } else {
+            const uploadImg = null
+        }
+
 
         const newDestination = await daftar_tempat.create({
             tempat_nama,

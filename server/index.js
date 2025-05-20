@@ -5,6 +5,7 @@ const bodyParser = require("body-parser")
 const cors = require("cors")
 const helmet = require("helmet")
 const dotenv = require("dotenv")
+
 const { updateRatingOtomatis, updateBookmarksOtomatis } = require("./utils/automatedQuery.js")
 dotenv.config()
 
@@ -32,6 +33,7 @@ app.use('/api', authRouter)
 app.use("/api", roleRoute)
 app.use("/api", destinationRoute)
 app.use("/api", userRoute)
+
 
 
 app.listen(port, () => {

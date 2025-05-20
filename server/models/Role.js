@@ -14,13 +14,13 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Role.init({
-    id: {
+    role_id: {
       primaryKey: true,
       allowNull: false,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4
     },
-    name: {
+    role_name: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
@@ -32,7 +32,6 @@ module.exports = (sequelize, DataTypes) => {
   },
     {
       sequelize,
-      modelName: 'Role',
       freezeTableName: true,
       timestamps: false
     });
