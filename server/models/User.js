@@ -32,6 +32,9 @@ module.exports = (sequelize, DataTypes) => {
                         msg: "Input username harus diisi",
                     },
                 },
+                unique: {
+                    msg: "Username sudah terpakai",
+                },
             },
             user_email: {
                 type: DataTypes.STRING,
@@ -45,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
                     },
                 },
                 unique: {
-                    msg: "Email sudah terdaftar",
+                    msg: "Email sudah terpakai",
                 },
             },
             user_address: {
