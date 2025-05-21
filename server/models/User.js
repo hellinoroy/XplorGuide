@@ -94,19 +94,18 @@ module.exports = (sequelize, DataTypes) => {
             freezeTableName: true,
             hooks: {
                 beforeCreate: async (user) => {
-                    const hashPassword = await bcrypt.hash(user.user_password, 10);
-                    user.user_password = hashPassword;
+                    user.user_password = await bcrypt.hash(user.user_password, 10);
 
                     if (user.user_username === "admin") {
                         const roleName = await sequelize.models.Role.findOne({
-                            where: { name: "admin" },
+                            where: { role_name: "admin" },
                         });
-                        user.user_role = roleName.id;
+                        user.role_id = roleName.role_id;
                     } else {
                         const roleName = await sequelize.models.Role.findOne({
-                            where: { name: "user" },
+                            where: { role_name: "user" },
                         });
-                        user.user_role = roleName.id;
+                        user.role_id = roleName.role_id;
                     }
                 },
             },
