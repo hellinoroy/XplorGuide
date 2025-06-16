@@ -41,29 +41,17 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
-            tempat_harga: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-            },
-            tempat_lat: {
-                type: DataTypes.FLOAT,
-            },
-            tempat_long: {
-                type: DataTypes.FLOAT,
-            },
             tempat_foto: {
                 type: DataTypes.STRING,
             },
             tempat_rating: {
                 type: DataTypes.DECIMAL(2, 1),
             },
-            tempat_bookmark: {
-                type: DataTypes.INTEGER,
-            },
         },
         {
             sequelize,
             freezeTableName: true,
+            timestamps: false,
         }
     );
     return Tempat;

@@ -1,7 +1,8 @@
-const { Op } = require("sequelize")
-const { daftar_tempat } = require("../models")
-const cloudinary = require("cloudinary").v2
-const streamifier = require("streamifier")
+const { Op } = require("sequelize");
+const { Tempat, Comment, User, Rating } = require("../models");
+const cloudinary = require("cloudinary").v2;
+const streamifier = require("streamifier");
+const axios = require("axios");
 
 function uploadToCloudinary(tempatFoto) {
     return new Promise((resolve, reject) => {
@@ -14,38 +15,47 @@ function uploadToCloudinary(tempatFoto) {
                 if (error) {
                     reject(new Error("Image tidak valid"));
                 } else {
-                    resolve(result.secure_url)
+                    resolve(result.secure_url);
                 }
             }
         );
         streamifier.createReadStream(tempatFoto.buffer).pipe(uploadStream);
     });
-};
+}
 
 async function getPublicId(id) {
     const getTempat = await daftar_tempat.findOne({
         where: {
-            tempat_id: id
-        }
-    })
-    const getDestination = getTempat.tempat_foto.split("/")[7]
-    const getId = getTempat.tempat_foto.split("/")[8].split(".")[0]
-    const getPublicId = `${ getDestination }/${ getId }`
-    return getPublicId
+            tempat_id: id,
+        },
+    });
+    const getDestination = getTempat.tempat_foto.split("/")[7];
+    const getId = getTempat.tempat_foto.split("/")[8].split(".")[0];
+    const getPublicId = `${getDestination}/${getId}`;
+    return getPublicId;
 }
 
 exports.createDestination = async (req, res) => {
     try {
-        const { tempat_nama, tempat_deskripsi, tempat_kategori, tempat_kota, tempat_rating, tempat_harga, tempat_lat, tempat_long, tempat_updateTerakhir, tempat_bookmark } = req.body
-
+        const {
+            tempat_nama,
+            tempat_deskripsi,
+            tempat_kategori,
+            tempat_kota,
+            tempat_rating,
+            tempat_harga,
+            tempat_lat,
+            tempat_long,
+            tempat_updateTerakhir,
+            tempat_bookmark,
+        } = req.body;
 
         if (req.file) {
-            const tempat_foto = req.file
-            const uploadImg = await uploadToCloudinary(tempat_foto)
+            const tempat_foto = req.file;
+            const uploadImg = await uploadToCloudinary(tempat_foto);
         } else {
-            const uploadImg = null
+            const uploadImg = null;
         }
-
 
         const newDestination = await daftar_tempat.create({
             tempat_nama,
@@ -58,141 +68,147 @@ exports.createDestination = async (req, res) => {
             tempat_long,
             tempat_updateTerakhir,
             tempat_bookmark,
-            tempat_foto: uploadImg
-        })
+            tempat_foto: uploadImg,
+        });
         return res.status(201).json({
             message: "Destination created",
-            data: newDestination
-        })
+            data: newDestination,
+        });
     } catch (error) {
         return res.status(500).json({
-            message: error.stack
-        })
+            message: error.stack,
+        });
     }
-}
+};
 exports.deleteDestination = async (req, res) => {
     try {
-        const { id } = req.params
+        const { id } = req.params;
         if (!id) {
             return res.status(400).json({
-                message: "id tidak ditemukan"
-            })
+                message: "id tidak ditemukan",
+            });
         }
-        const publicId = await getPublicId(id)
+        const publicId = await getPublicId(id);
         if (!publicId) {
             return res.status(400).json({
-                message: "public id tidak ditemukan"
-            })
+                message: "public id tidak ditemukan",
+            });
         }
 
         cloudinary.uploader.destroy(publicId, (error, result) => {
             if (error) {
                 return res.status(500).json({
-                    message: error.message
-                })
+                    message: error.message,
+                });
             } else {
-                console.log(result)
-                console.log(`Deleted Image Public Id : ${ getPublicId }`)
+                console.log(result);
+                console.log(`Deleted Image Public Id : ${getPublicId}`);
             }
-        })
+        });
 
         const deleteDestination = await daftar_tempat.destroy({
             where: {
-                tempat_id: id
-            }
-        })
+                tempat_id: id,
+            },
+        });
         return res.status(200).json({
             message: "Destination deleted",
-            data: deleteDestination
-        })
+            data: deleteDestination,
+        });
     } catch (error) {
         return res.status(500).json({
-            message: error.stack
-        })
+            message: error.stack,
+        });
     }
-}
+};
 
 exports.getDestination = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1
-        const limit = parseInt(req.query.limit) || 4
-        const search = req.query.search || ""
-        const offset = (page - 1) * limit
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 4;
+        const search = req.query.search || "";
+        const offset = (page - 1) * limit;
 
         const notExistTempatNama = await daftar_tempat.findOne({
             where: {
                 tempat_nama: {
-                    [Op.like]: `%${ search }%`
-                }
-            }
-        })
+                    [Op.like]: `%${search}%`,
+                },
+            },
+        });
         if (!notExistTempatNama) {
             return res.status(400).json({
-                message: "Tempat destinasi tidak ditemukan"
-            })
+                message: "Tempat destinasi tidak ditemukan",
+            });
         }
 
         if (search) {
             const getDestinationBySearch = await daftar_tempat.findAll({
                 where: {
                     tempat_nama: {
-                        [Op.like]: `%${ search }%`
-                    }
-                }
-            })
+                        [Op.like]: `%${search}%`,
+                    },
+                },
+            });
             res.status(200).json({
                 message: "Search destination Success",
                 limit: 0,
                 page: 0,
-                data: getDestinationBySearch
-            })
+                data: getDestinationBySearch,
+            });
         }
         if (!search) {
             const getPaginateData = await daftar_tempat.findAll({
                 limit,
                 offset,
-                order: [
-                    ['tempat_id', 'ASC']
-                ]
-            })
+                order: [["tempat_id", "ASC"]],
+            });
             return res.status(200).json({
                 message: "Get all destination Success",
                 limit,
                 page,
-                data: getPaginateData
-            })
+                data: getPaginateData,
+            });
         }
     } catch (error) {
         return res.status(500).json({
-            message: error.message
-        })
+            message: error.message,
+        });
     }
-
-}
+};
 
 exports.updateDestination = async (req, res) => {
     try {
-        const { id } = req.params
-        const { tempat_nama, tempat_deskripsi, tempat_kategori, tempat_kota, tempat_rating, tempat_harga, tempat_lat, tempat_long, tempat_bookmark } = req.body
-        const tempat_foto = req.file
+        const { id } = req.params;
+        const {
+            tempat_nama,
+            tempat_deskripsi,
+            tempat_kategori,
+            tempat_kota,
+            tempat_rating,
+            tempat_harga,
+            tempat_lat,
+            tempat_long,
+            tempat_bookmark,
+        } = req.body;
+        const tempat_foto = req.file;
         if (!id) {
             return res.status(400).json({
-                message: "id tidak ditemukan"
-            })
+                message: "id tidak ditemukan",
+            });
         }
-        const publicId = await getPublicId(id)
+        const publicId = await getPublicId(id);
         cloudinary.uploader.destroy(publicId, (error, result) => {
             if (error) {
                 return res.status(500).json({
-                    message: error.stack
-                })
+                    message: error.stack,
+                });
+            } else {
+                console.log(result);
+                console.log(`Deleted Image Public Id : ${getPublicId}`);
             }
-            else {
-                console.log(result)
-                console.log(`Deleted Image Public Id : ${ getPublicId }`)
-            }
-        })
-        const uploadImg = await uploadToCloudinary(tempat_foto)
+        });
+        const uploadImg = await uploadToCloudinary(tempat_foto);
         const updateDestination = await daftar_tempat.update(
             {
                 tempat_nama,
@@ -204,15 +220,122 @@ exports.updateDestination = async (req, res) => {
                 tempat_lat,
                 tempat_long,
                 tempat_bookmark,
-                tempat_foto: uploadImg
-            }, { where: { tempat_id: id } })
+                tempat_foto: uploadImg,
+            },
+            { where: { tempat_id: id } }
+        );
         return res.status(200).json({
             message: "Destination updated",
-            data: updateDestination
-        })
+            data: updateDestination,
+        });
     } catch (error) {
         return res.status(500).json({
-            message: error.stack
-        })
+            message: error.stack,
+        });
     }
-}
+};
+
+exports.searchDestination = async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q) {
+            const allPlaces = await Tempat.findAll();
+            return res.status(200).json(allPlaces);
+        }
+
+        const results = await Tempat.findAll({
+            attributes: {
+                exclude: ["tempat_deskripsi", "tempat_rating"],
+            },
+            where: {
+                tempat_nama: {
+                    [Op.like]: `%${q}%`,
+                },
+            },
+        });
+        // console.log(results);
+        res.status(200).json(results);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+exports.viewDestination = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const results = await Tempat.findOne({
+            where: { tempat_id: id },
+            include: [
+                {
+                    model: Comment,
+                    include: [
+                        {
+                            model: User,
+                            attributes: ["user_username"],
+                        },
+                    ],
+                },
+            ],
+        });
+        res.status(200).json(results);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+exports.getRecommendation = async (req, res) => {
+    // http://127.0.0.1:8000
+    try {
+        const getCurrentUserById = await User.findByPk(req.user.user_id, {
+            attributes: {
+                exclude: ["user_id", "user_password"],
+            },
+            include: [
+                {
+                    model: Rating,
+                    include: [
+                        {
+                            model: Tempat,
+                        },
+                    ],
+                },
+            ],
+        });
+
+        if (!getCurrentUserById) {
+            return res.status(404).json({
+                message: "User Tidak Ditemukan",
+            });
+        }
+
+        // tempat_id harus dikurang 1
+        const payload = {
+            ratings: getCurrentUserById.Ratings.map((item) => ({
+                item_id: item.tempat_id - 1,
+                rating: item.rating_rating,
+            })),
+        };
+
+        // console.log(payload);
+        const response = await axios.post(
+            "http://localhost:8000/recommend",
+            payload
+        );
+        const data = response.data.recommendations;
+        const incrementedArray = data.map((num) => num + 1);
+        const recommendation = await Tempat.findAll({
+            attributes: {
+                exclude: ["tempat_deskripsi", "tempat_rating"],
+            },
+            where: { tempat_id: incrementedArray },
+        });
+
+        return res.status(200).json(recommendation);
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+        });
+    }
+};

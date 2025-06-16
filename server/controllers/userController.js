@@ -1,11 +1,9 @@
-const { bookmarks } = require("../models")
-const { ratings } = require("../models")
-const { comments } = require("../models")
+const { Rating, Bookmark, Comment } = require("../models");
 
-exports.addBookmark = async (req, res) => {
+exports.putBookmark = async (req, res) => {
     try {
-        const tempat_id = req.params.tempat_id
-        const user_id = req.user.id
+        const tempat_id = req.params.tempat_id;
+        const user_id = req.user.user_id;
 
         if (!tempat_id || !user_id) {
             return res.status(400).json({
@@ -13,77 +11,137 @@ exports.addBookmark = async (req, res) => {
             });
         }
 
-        const existingBookmark = await bookmarks.findOne({
+        const existingBookmark = await Bookmark.findOne({
             where: { user_id, tempat_id },
         });
 
         if (existingBookmark) {
-            return res.status(409).json({
-                message: "Bookmark sudah ada untuk pengguna dan tempat ini",
+            await existingBookmark.destroy();
+            return res.status(200).json({
+                message: "Bookmark berhasil dihapus",
+            });
+        } else {
+            const newBookmark = await Bookmark.create({ user_id, tempat_id });
+            return res.status(201).json({
+                message: "Bookmark berhasil ditambahkan",
+                data: newBookmark,
             });
         }
-        const newBookmark = await bookmarks.create({ user_id, tempat_id });
-
-        return res.status(201).json({
-            message: "Bookmark berhasil ditambahkan",
-            data: newBookmark,
-        });
     } catch (error) {
         return res.status(500).json({
-            message: error.message || "Terjadi kesalahan saat menambahkan bookmark",
+            message:
+                error.message || "Terjadi kesalahan saat mengelola bookmark",
         });
     }
 };
 
-exports.addRating = async (req, res) => {
+exports.putRating = async (req, res) => {
     try {
-        const tempat_id = req.params.tempat_id
-        const user_id = req.user.id
-        const { rating } = req.body
-        if (!tempat_id || !user_id || !rating) {
+        const tempat_id = req.params.tempat_id;
+        const user_id = req.user.user_id;
+        const rating_rating = req.body.rating;
+
+        console.log(tempat_id, user_id, rating_rating);
+
+        if (!tempat_id || !user_id || !rating_rating) {
             return res.status(400).json({
                 message: "user_id, tempat_id, dan rating harus disertakan",
-            })
+            });
         }
 
-        const createRating = await ratings.create({
-            user_id,
-            tempat_id,
-            rating
-        })
+        let ratingRecord = await Rating.findOne({
+            where: {
+                user_id,
+                tempat_id,
+            },
+        });
+
+        if (ratingRecord) {
+            // console.log(ratingRecord)
+            const result = await ratingRecord.update({
+                rating_rating: rating_rating,
+            });
+            console.log("Update result:", result);
+        } else {
+            ratingRecord = await Rating.create({
+                user_id,
+                tempat_id,
+                rating_rating: rating_rating,
+            });
+        }
+
         return res.status(201).json({
             message: "Terima Kasih telah memberikan rating :)",
-            data: createRating
-        })
+            data: ratingRecord,
+        });
     } catch (error) {
         return res.status(500).json({
-            message: error.message || "Terjadi kesalahan saat menambahkan rating",
-        })
+            message:
+                error.message || "Terjadi kesalahan saat menambahkan rating",
+        });
     }
-}
+};
 
-exports.addComment = async (req, res) => {
+exports.postComment = async (req, res) => {
     try {
-        const tempat_id = req.params.tempat_id
-        const user_id = req.user.id
-        const { comment } = req.body
+        const tempat_id = req.params.tempat_id;
+        const user_id = req.user.user_id;
+        const comment = req.body.comment;
+
         if (!tempat_id || !user_id || !comment) {
             return res.status(400).json({
                 message: "user_id, tempat_id, dan comment harus disertakan",
-            })
+            });
         }
-        const createComment = await comments.create({
+        const createComment = await Comment.create({
             user_id,
             tempat_id,
-            comment
-        })
+            comment_comment: comment,
+        });
         return res.status(201).json({
             message: "Terima Kasih telah memberikan comment :)",
-            data: createComment
-        })
+            data: createComment,
+        });
     } catch (error) {
         return res.status(500).json({
-            message: error.message || "Terjadi kesalahan saat menambahkan comment",
-        })
+            message:
+                error.message || "Terjadi kesalahan saat menambahkan comment",
+        });
     }
-}
+};
+
+exports.getAttributes = async (req, res) => {
+    try {
+        const tempat_id = req.params.tempat_id;
+        const user_id = req.user.user_id;
+        const attribute = { rating: 0, bookmark: false };
+
+        const existingRating = await Rating.findOne({
+            where: {
+                user_id,
+                tempat_id,
+            },
+        });
+
+        if (existingRating) {
+            attribute["rating"] = existingRating.rating_rating;
+        }
+        const existingBookmark = await Bookmark.findOne({
+            where: { user_id, tempat_id },
+        });
+
+        if (existingBookmark) {
+            attribute["bookmark"] = true;
+        }
+
+        return res.status(200).json({
+            message: "Berhasil mendapatkan atribut pengguna",
+            data: attribute,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message:
+                error.message || "Terjadi kesalahan saat menambahkan rating",
+        });
+    }
+};

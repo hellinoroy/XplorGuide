@@ -1,6 +1,6 @@
 const express = require("express")
 const app = express()
-const port = 4000
+const port = 4040
 const bodyParser = require("body-parser")
 const cors = require("cors")
 const helmet = require("helmet")
@@ -18,7 +18,6 @@ cloudinary.config({
 
 // routes
 const authRouter = require("./routes/auth")
-const roleRoute = require("./routes/role")
 const destinationRoute = require("./routes/destination")
 const userRoute = require("./routes/user")
 
@@ -29,10 +28,10 @@ app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(helmet())
 
-app.use('/api', authRouter)
-app.use("/api", roleRoute)
-app.use("/api", destinationRoute)
-app.use("/api", userRoute)
+
+app.use('/api/auth', authRouter)
+app.use("/api/destination", destinationRoute)
+app.use("/api/user", userRoute)
 
 
 

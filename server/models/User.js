@@ -13,7 +13,6 @@ module.exports = (sequelize, DataTypes) => {
             User.hasMany(models.Bookmark, { foreignKey: "user_id" });
             User.hasMany(models.Rating, { foreignKey: "user_id" });
             User.hasMany(models.Comment, { foreignKey: "user_id" });
-            User.belongsTo(models.Role, { foreignKey: "role_id" })
         }
     }
     User.init(
@@ -61,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
                 },
             },
             user_age: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.DATE,
                 allowNull: false,
                 validate: {
                     notNull: {
@@ -82,11 +81,6 @@ module.exports = (sequelize, DataTypes) => {
                     },
                 },
             },
-            role_id: {
-                type: DataTypes.UUID,
-                defaultValue: DataTypes.UUIDV4,
-                allowNull: false
-            },
         },
         {
             sequelize,
@@ -96,18 +90,6 @@ module.exports = (sequelize, DataTypes) => {
                 beforeCreate: async (user) => {
                     const hashPassword = await bcrypt.hash(user.user_password, 10);
                     user.user_password = hashPassword;
-
-                    if (user.user_username === "admin") {
-                        const roleName = await sequelize.models.Role.findOne({
-                            where: { name: "admin" },
-                        });
-                        user.user_role = roleName.id;
-                    } else {
-                        const roleName = await sequelize.models.Role.findOne({
-                            where: { name: "user" },
-                        });
-                        user.user_role = roleName.id;
-                    }
                 },
             },
         }
