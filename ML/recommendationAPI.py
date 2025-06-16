@@ -56,25 +56,12 @@ class RecommendationResponse(BaseModel):
     user_id: int
     recommendations: List[int]
 
-
-
-# uvicorn recommendationAPI:app --reload  
-# item id = tempat id, harus dikurang 1
-# {
-#   "ratings": [
-#     {"item_id": 10, "rating": 5},
-#     {"item_id": 240, "rating": 5},
-#     {"item_id": 131, "rating": 5}
-#   ]
-# }
-
-
 @app.post("/recommend", response_model=RecommendationResponse)
 def recommend(request: RecommendationRequest):
     user_id = 300  # Hardcoded for new users
     interacted_places = [r.item_id for r in request.ratings if r.rating >= 4]
     all_place_ids = list(range(437))
-    top_n = 10
+    top_n = 5
 
     user_tensor = torch.tensor([user_id] * len(all_place_ids), dtype=torch.long).to(device)
     place_tensor = torch.tensor(all_place_ids, dtype=torch.long).to(device)
