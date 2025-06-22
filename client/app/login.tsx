@@ -28,7 +28,7 @@ export default function LoginScreen() {
         // authContext.logIn("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc2YjIxMjFmLWJmMjAtNDI5NS05YmI2LTY5YTVmMGM3NDU0NiIsImlhdCI6MTc1MDA0OTIxMCwiZXhwIjoxNzUwNjU0MDEwfQ.TuThpGr587F-nh5cSplxzCYECv70qK1HJn_OtAf84xY")
         try {
             const response = await axios.post(
-                "http://192.168.1.8:4040/api/auth/login",
+                "http://192.168.1.6:4040/api/auth/login",
                 {
                     email,
                     password,

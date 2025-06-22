@@ -204,7 +204,7 @@ export default function ViewScreen() {
             // console.log(comment)
             const payload = { comment: comment };
             const response = await axios.post(
-                `http://192.168.1.8:4040/api/user/comment/${encodeURIComponent(
+                `http://192.168.1.6:4040/api/user/comment/${encodeURIComponent(
                     id
                 )}`,
                 payload,

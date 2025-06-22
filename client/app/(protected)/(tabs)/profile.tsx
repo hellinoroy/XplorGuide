@@ -27,7 +27,7 @@ export default function Profile() {
         const fetchMe = async () => {
             // console.log("profile");
             const response = await axios.get(
-                `http://192.168.1.8:4040/api/auth/me`,
+                `http://192.168.1.6:4040/api/auth/me`,
                 {
                     headers: {
                         "Content-Type": "application/json",

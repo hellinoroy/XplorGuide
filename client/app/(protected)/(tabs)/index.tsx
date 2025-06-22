@@ -19,7 +19,7 @@ export default function HomeScreen() {
             const fetchRecommendation = async () => {
                 try {
                     const response = await axios.get(
-                        "http://192.168.1.8:4040/api/destination/recommendation",
+                        "http://192.168.1.6:4040/api/destination/recommendation",
                         {
                             headers: {
                                 "Content-Type": "application/json",

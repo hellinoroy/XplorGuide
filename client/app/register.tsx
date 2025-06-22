@@ -56,7 +56,7 @@ export default function LoginScreen() {
     const onSubmit = async () => {
         try {
             await axios.post(
-                "http://192.168.1.8:4040/api/auth/register",
+                "http://192.168.1.6:4040/api/auth/register",
                 {
                     name,
                     email,
