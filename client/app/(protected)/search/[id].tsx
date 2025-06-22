@@ -72,7 +72,7 @@ export default function ViewScreen() {
         const fetchTempat = async () => {
             try {
                 const response = await axios.get(
-                    `http://192.168.1.8:4040/api/destination/${encodeURIComponent(
+                    `http://192.168.1.16:4040/api/destination/${encodeURIComponent(
                         id
                     )}`,
                     {
