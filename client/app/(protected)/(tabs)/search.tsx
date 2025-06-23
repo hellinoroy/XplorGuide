@@ -14,64 +14,42 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather, AntDesign } from "@expo/vector-icons";
 import axios from "axios";
-
+import { AuthContext } from "../../../utils/authContext";
+import { useRouter } from "expo-router";
 const { width: screenWidth } = Dimensions.get("window");
 
-// Mock AuthContext for demo
-const AuthContext = {
-	token: "mock-token",
-};
 
-// Mock SearchComponent
-const SearchComponent = ({ item }: { item: any }) => (
-	<Pressable style={styles.resultCard}>
-		<Image
-			source={{
-				uri:
-					item.image ||
-					"https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop",
-			}}
-			style={styles.resultImage}
-		/>
-		<View style={styles.resultContent}>
-			<Text style={styles.resultTitle}>
-				{item.name || item.title || "Beautiful Destination"}
-			</Text>
-			<View style={styles.resultLocation}>
-				<Feather
-					name="map-pin"
-					size={14}
-					color="#6B7280"
-				/>
-				<Text style={styles.locationText}>
-					{item.location || "Aceh, Indonesia"}
-				</Text>
-			</View>
-			<View style={styles.resultMeta}>
-				<View style={styles.rating}>
-					<Feather
-						name="star"
-						size={12}
-						color="#FCD34D"
-					/>
-					<Text style={styles.ratingText}>
-						{item.rating || "4.8"}
-					</Text>
-				</View>
-				<Text style={styles.category}>
-					{item.category || "Wisata Alam"}
-				</Text>
-			</View>
-		</View>
-		<Pressable style={styles.favoriteButton}>
-			<AntDesign
-				name="hearto"
-				size={18}
-				color="#9CA3AF"
-			/>
-		</Pressable>
-	</Pressable>
-);
+const SearchComponent = ({ item }: { item: any }) => {
+    const router = useRouter();
+
+    return (
+        <Pressable
+            style={styles.bookmarkCard}
+            onPress={() => router.push(`/search/${item.tempat_id}`)}
+        >
+            <Image
+                source={{
+                    uri: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop",
+                }}
+                style={styles.bookmarkImage}
+            />
+            <View style={styles.bookmarkInfo}>
+                <Text style={styles.bookmarkTitle}>
+                    {item.tempat_id} | {item.tempat_nama || "Beautiful Place"}
+                </Text>
+                <Text style={styles.bookmarkLocation}>
+                    <Feather name="map-pin" size={12} color="#6B7280" />{" "}
+                    {item.tempat_kota || "Aceh, Indonesia"}
+                </Text>
+                <View style={styles.bookmarkRating}>
+                    <Text style={styles.ratingText}>
+                        {item.tempat_kategori}
+                    </Text>
+                </View>
+            </View>
+        </Pressable>
+    );
+};
 
 export default function SearchScreen() {
 	const [target, setTarget] = useState("");
@@ -111,7 +89,7 @@ export default function SearchScreen() {
 		setIsLoading(true);
 		try {
 			const response = await axios.get(
-				`http://192.168.1.16:4040/api/destination/search?q=${encodeURIComponent(
+				`http://192.168.1.8:4040/api/destination/search?q=${encodeURIComponent(
 					target
 				)}`,
 				{
@@ -330,13 +308,13 @@ export default function SearchScreen() {
 										colors={["#EF4444", "#DC2626"]}
 										style={styles.quickActionGradient}>
 										<Feather
-											name="heart"
+											name="bookmark"
 											size={24}
 											color="#fff"
 										/>
 									</LinearGradient>
 									<Text style={styles.quickActionText}>
-										Favorit
+										Bookmark Tinggi
 									</Text>
 								</Pressable>
 
@@ -747,4 +725,53 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignSelf: "center",
 	},
+       bookmarksList: {
+        maxHeight: 300,
+    },
+    bookmarkCard: {
+        flexDirection: "row",
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 12,
+        marginBottom: 12,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    bookmarkImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 8,
+        marginRight: 12,
+    },
+    bookmarkInfo: {
+        flex: 1,
+        justifyContent: "space-between",
+    },
+    bookmarkTitle: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#111827",
+        marginBottom: 4,
+    },
+    bookmarkLocation: {
+        fontSize: 14,
+        color: "#6B7280",
+        marginBottom: 4,
+    },
+    bookmarkRating: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    bookmarkAction: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: "#FEF2F2",
+        alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "center",
+    },
 });

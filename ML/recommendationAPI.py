@@ -3,6 +3,9 @@ from pydantic import BaseModel
 from typing import List
 import torch
 import torch.nn as nn
+import numpy as np
+
+#  uvicorn recommendationAPI:app --reload    
 
 # Define the NeuMF model
 class NeuMF(nn.Module):
@@ -115,6 +118,24 @@ class RecommendationResponse(BaseModel):
     user_id: int
     recommendations: List[int]
     scores: List[ScoredPlace]
+    distribution: dict
+
+def normalized_threshold_distribution(scores: torch.Tensor) -> dict:
+    scores = scores.detach().cpu().numpy()
+
+    if len(scores) == 0:
+        return {"high": 0, "medium": 0, "low": 0}
+
+    # Normalize scores to [0, 1] range
+    min_score = np.min(scores)
+    max_score = np.max(scores)
+    norm_scores = (scores - min_score) / (max_score - min_score + 1e-8)
+
+    return {
+        "high": int(np.sum(norm_scores >= 0.7)),
+        "medium": int(np.sum((norm_scores >= 0.4) & (norm_scores < 0.7))),
+        "low": int(np.sum(norm_scores < 0.4)),
+    }
 
 @app.post("/recommendation/{model_name}", response_model=RecommendationResponse)
 def recommend(model_name: str, request: RecommendationRequest):
@@ -153,5 +174,6 @@ def recommend(model_name: str, request: RecommendationRequest):
     return RecommendationResponse(
         user_id=user_id,
         recommendations=top_recommendations,
-        scores=scored_places
+        scores=scored_places,
+        distribution=normalized_threshold_distribution(filtered_scores)
     )

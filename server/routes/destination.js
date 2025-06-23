@@ -1,12 +1,13 @@
 const express = require("express")
 const destinationRoute = express.Router()
-const { createDestination, deleteDestination, updateDestination, getRecommendation, searchDestination, viewDestination } = require("../controllers/destinationController")
+const { createDestination, deleteDestination, updateDestination, getRecommendation, searchDestination, viewDestination, dataSebelum } = require("../controllers/destinationController")
 const { upload } = require("../utils/fileUpload")
 const { authMiddleware, permissionRole } = require("../middleware/userMiddleware")
 
 
-destinationRoute.get("/recommendation", authMiddleware, getRecommendation)
+destinationRoute.get("/recommendation/:modelName", authMiddleware, getRecommendation)
 destinationRoute.get("/search", searchDestination)
+destinationRoute.get("/data-sebelum", dataSebelum)
 destinationRoute.get("/:id", viewDestination)
 
 

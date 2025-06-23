@@ -17,7 +17,6 @@ exports.authMiddleware = async (req, res, next) => {
             });
         }
         const decoded = jwt.verify(token, process.env.JWT_ACCESS_TOKEN);
-
         const currentUser = await User.findByPk(decoded.id);
 
         if (!currentUser) {
@@ -26,7 +25,6 @@ exports.authMiddleware = async (req, res, next) => {
             });
         }
 
-        // ✅ Attach user to request
         req.user = currentUser;
         next();
     } catch (error) {

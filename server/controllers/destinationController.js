@@ -1,5 +1,11 @@
 const { Op } = require("sequelize");
-const { Tempat, Comment, User, Rating } = require("../models");
+const {
+    Tempat,
+    Comment,
+    User,
+    Rating,
+    Data_before_tests,
+} = require("../models");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
 const axios = require("axios");
@@ -288,6 +294,7 @@ exports.viewDestination = async (req, res) => {
 exports.getRecommendation = async (req, res) => {
     // http://127.0.0.1:8000
     try {
+        const modelName = req.params.modelName; 
         const getCurrentUserById = await User.findByPk(req.user.user_id, {
             attributes: {
                 exclude: ["user_id", "user_password"],
@@ -320,11 +327,11 @@ exports.getRecommendation = async (req, res) => {
 
         // console.log(payload);
         const response = await axios.post(
-            "http://localhost:8000/recommend",
+            `http://localhost:8000/recommendation/${modelName}`,
             payload
         );
-        const data = response.data.recommendations;
-        const incrementedArray = data.map((num) => num + 1);
+        const data = response.data;
+        const incrementedArray = data.recommendations.map((num) => num + 1);
         const recommendation = await Tempat.findAll({
             attributes: {
                 exclude: ["tempat_deskripsi", "tempat_rating"],
@@ -332,8 +339,21 @@ exports.getRecommendation = async (req, res) => {
             where: { tempat_id: incrementedArray },
         });
 
-        return res.status(200).json(recommendation);
+        return res.status(200).json({recommendation: recommendation, scores: data.scores, distribution: data.distribution});
     } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+        });
+    }
+};
+
+exports.dataSebelum = async (req, res) => {
+    try {
+        const results = await Data_before_tests.findAll();
+        // console.log(results);
+        return res.status(200).json(results);
+    } catch (error) {
+        console.log(error)
         return res.status(500).json({
             message: error.message,
         });
