@@ -36,8 +36,10 @@ type UserFormat = {
     user_username: string;
 };
 type CommentFormat = {
+    id: string;
     User: UserFormat;
     comment_comment: string;
+    user_id: string;
 };
 
 type Format = {
@@ -54,6 +56,8 @@ type Format = {
 export default function ViewScreen() {
     const router = useRouter();
     const { id } = useLocalSearchParams<{ id: string }>();
+
+    const [userId, setUserId] = useState<string>("");
 
     const [results, setResults] = useState<Format | null>(null);
     const authState = useContext(AuthContext);
@@ -80,7 +84,8 @@ export default function ViewScreen() {
                         },
                     }
                 );
-                console.log(response.data);
+                // console.log(response.data);
+                console.log(response.data.Comments);
                 setResults(response.data);
             } catch (error: unknown) {
                 if (axios.isAxiosError(error)) {
@@ -124,6 +129,36 @@ export default function ViewScreen() {
             }
         };
 
+        const fetchMe = async () => {
+            try {
+                const response = await axios.get(
+                    `http://192.168.1.8:4040/api/auth/me`,
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${authState.token}`,
+                        },
+                    }
+                );
+                // console.log(response.data.data.Bookmarks);
+                const data = response.data.data;
+                // console.log(data.user_id)
+                // console.log(data.User)
+                setUserId(data.user_id);
+            } catch (error: unknown) {
+                if (axios.isAxiosError(error)) {
+                    console.error(
+                        "Server error:",
+                        error.response?.data.message
+                    );
+                } else {
+                    console.error("Unexpected error:", error);
+                }
+            }
+        };
+
+        fetchMe();
+
         fetchTempat();
         fetchUserInteraction();
     }, []);
@@ -146,7 +181,7 @@ export default function ViewScreen() {
                         },
                     }
                 );
-                console.log(response.data);
+                // console.log(response.data);
             } catch (error: unknown) {
                 if (axios.isAxiosError(error)) {
                     console.error(
@@ -224,10 +259,31 @@ export default function ViewScreen() {
         }
     };
 
+    const onDelete = async (comment_id: any, user_id: any) => {
+        try {
+            const response = await axios.delete(
+                `http://192.168.1.8:4040/api/user/comment/${id}/${comment_id}/${user_id}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${authState.token}`,
+                    },
+                }
+            );
+            // console.log(response);
+            router.replace(`/search/${id}`);
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                console.error("Server error:", error.response?.data.message);
+            } else {
+                console.error("Unexpected error:", error);
+            }
+        }
+    };
+
     const handleGoBack = () => {
         router.back();
     };
-
 
     return (
         <SafeAreaView className="bg-white flex-1 flex-col">
@@ -239,10 +295,7 @@ export default function ViewScreen() {
 
             {results && (
                 <ScrollView className="flex flex-col">
-                    <View style={styles.imageContainer}>
-
-                        
-                    </View>
+                    <View style={styles.imageContainer}></View>
                     <Image
                         className="self-center m-5"
                         source={
@@ -347,6 +400,19 @@ export default function ViewScreen() {
                                     style={styles.bookmarkCard}
                                 >
                                     <View style={styles.bookmarkInfo}>
+                                        {item.user_id == userId && (
+                                            <Pressable
+                                                className="items-end"
+                                                onPress={() =>
+                                                    onDelete(item.id, userId)
+                                                }
+                                            >
+                                                <Text className="bg-red-500 rounded px-1">
+                                                    Delete Comment
+                                                </Text>
+                                            </Pressable>
+                                        )}
+
                                         <Text style={styles.bookmarkTitle}>
                                             {item.User.user_username}
                                         </Text>

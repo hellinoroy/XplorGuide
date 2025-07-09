@@ -118,24 +118,10 @@ export default function Profile() {
             >
                 {/* Profile Avatar and Info */}
                 <View style={styles.profileSection}>
-                    <View style={styles.avatarContainer}>
-                        <Image
-                            source={{
-                                uri: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-                            }}
-                            style={styles.avatar}
-                        />
-                        <Pressable style={styles.editAvatarButton}>
-                            <Feather name="camera" size={16} color="#fff" />
-                        </Pressable>
-                    </View>
 
                     <View style={styles.profileInfo}>
                         <Text style={styles.username}>{me.user_username}</Text>
                         <Text style={styles.email}>{me.email}</Text>
-                        <Text style={styles.joinDate}>
-                            Bergabung sejak {me.joinDate}
-                        </Text>
                     </View>
 
                     {/* Stats Row */}
@@ -146,20 +132,6 @@ export default function Profile() {
                             </Text>
                             <Text style={styles.statLabel}>Boookmark</Text>
                         </View>
-                        <View style={styles.statDivider} />
-                        <View style={styles.statItem}>
-                            <Text style={styles.statNumber}>
-                                {me.totalTrips}
-                            </Text>
-                            <Text style={styles.statLabel}>Perjalanan</Text>
-                        </View>
-                        <View style={styles.statDivider} />
-                        <View style={styles.statItem}>
-                            <Text style={styles.statNumber}>
-                                {me.totalReviews}
-                            </Text>
-                            <Text style={styles.statLabel}>Ulasan</Text>
-                        </View>
                     </View>
                 </View>
             </LinearGradient>
@@ -168,31 +140,7 @@ export default function Profile() {
             <View style={styles.content}>
                 {/* Quick Actions */}
                 <View style={styles.quickActions}>
-                    <Pressable style={styles.actionButton}>
-                        <View style={styles.actionIcon}>
-                            <Feather name="edit-3" size={20} color="#047857" />
-                        </View>
-                        <Text style={styles.actionText}>Edit Profil</Text>
-                    </Pressable>
-
-                    <Pressable style={styles.actionButton}>
-                        <View style={styles.actionIcon}>
-                            <Feather
-                                name="settings"
-                                size={20}
-                                color="#6B7280"
-                            />
-                        </View>
-                        <Text style={styles.actionText}>Pengaturan</Text>
-                    </Pressable>
-
-                    <Pressable style={styles.actionButton}>
-                        <View style={styles.actionIcon}>
-                            <Feather name="share-2" size={20} color="#3B82F6" />
-                        </View>
-                        <Text style={styles.actionText}>Bagikan</Text>
-                    </Pressable>
-
+  
                     {/* Logout Button */}
                     <Pressable
                         onPress={() => authState.logOut()}
@@ -255,69 +203,9 @@ export default function Profile() {
                     </ScrollView>
                 </View>
 
-                {/* Additional Menu Items */}
-                {/* <View style={styles.menuSection}>
-                    <Pressable style={styles.menuItem}>
-                        <View style={styles.menuIcon}>
-                            <Feather name="clock" size={20} color="#8B5CF6" />
-                        </View>
-                        <View style={styles.menuContent}>
-                            <Text style={styles.menuTitle}>
-                                Riwayat Perjalanan
-                            </Text>
-                            <Text style={styles.menuSubtitle}>
-                                Lihat tempat yang pernah dikunjungi
-                            </Text>
-                        </View>
-                        <Feather
-                            name="chevron-right"
-                            size={20}
-                            color="#9CA3AF"
-                        />
-                    </Pressable>
 
-                    <Pressable style={styles.menuItem}>
-                        <View style={styles.menuIcon}>
-                            <Feather name="star" size={20} color="#F59E0B" />
-                        </View>
-                        <View style={styles.menuContent}>
-                            <Text style={styles.menuTitle}>Ulasan Saya</Text>
-                            <Text style={styles.menuSubtitle}>
-                                Kelola ulasan dan rating
-                            </Text>
-                        </View>
-                        <Feather
-                            name="chevron-right"
-                            size={20}
-                            color="#9CA3AF"
-                        />
-                    </Pressable>
 
-                    <Pressable style={styles.menuItem}>
-                        <View style={styles.menuIcon}>
-                            <Feather
-                                name="help-circle"
-                                size={20}
-                                color="#06B6D4"
-                            />
-                        </View>
-                        <View style={styles.menuContent}>
-                            <Text style={styles.menuTitle}>
-                                Bantuan & Dukungan
-                            </Text>
-                            <Text style={styles.menuSubtitle}>
-                                FAQ dan hubungi kami
-                            </Text>
-                        </View>
-                        <Feather
-                            name="chevron-right"
-                            size={20}
-                            color="#9CA3AF"
-                        />
-                    </Pressable>
-                </View> */}
-
-                <View style={{ height: 40 }} />
+      
             </View>
         </SafeAreaView>
     );
@@ -474,7 +362,7 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     },
     bookmarksList: {
-        maxHeight: 300,
+        maxHeight: 400,
     },
     bookmarkCard: {
         flexDirection: "row",

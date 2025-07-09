@@ -110,6 +110,41 @@ exports.postComment = async (req, res) => {
     }
 };
 
+exports.deleteComment = async (req, res) => {
+    try {
+        const paramTempatId = req.params.tempat_id;
+        const paramUserId = req.params.user_id;
+        const paramCommentId = req.params.comment_id;
+
+        const user_id = req.user.user_id;
+
+        if (user_id != paramUserId) {
+            return res.status(401);
+        }
+
+        const comment = await Comment.findOne({
+            where: {
+                id: paramCommentId,
+                tempat_id: paramTempatId,
+                user_id: paramUserId,
+            },
+        });
+
+        await comment.destroy();
+
+        return res
+            .status(200)
+            .json({ message: "Comment deleted successfully" });
+
+        return res.status(201).json({});
+    } catch (error) {
+        return res.status(500).json({
+            message:
+                error.message || "Terjadi kesalahan saat menambahkan comment",
+        });
+    }
+};
+
 exports.getAttributes = async (req, res) => {
     try {
         const tempat_id = req.params.tempat_id;

@@ -75,7 +75,7 @@ exports.me = async (req, res) => {
         // console.log(req.user.user_id)
         const getCurrentUserById = await User.findByPk(req.user.user_id, {
             attributes: {
-                exclude: ["user_id", "user_password",],
+                exclude: ["user_password",],
             },
             include: [
                 {

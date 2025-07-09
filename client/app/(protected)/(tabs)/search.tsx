@@ -233,19 +233,6 @@ export default function SearchScreen() {
 						)}
 					</Pressable>
 				</View>
-
-				{/* Categories */}
-				<ScrollView
-					horizontal
-					showsHorizontalScrollIndicator={false}
-					style={styles.categoriesContainer}>
-					{categories.map(category => (
-						<CategoryButton
-							key={category.id}
-							category={category}
-						/>
-					))}
-				</ScrollView>
 			</LinearGradient>
 
 			{/* Main Content */}
@@ -255,100 +242,6 @@ export default function SearchScreen() {
 				{target.length === 0 && results.length === 0 ? (
 					// Default state - Recent searches and popular destinations
 					<>
-						{/* Recent Searches */}
-						{recentSearches.length > 0 && (
-							<View style={styles.section}>
-								<Text style={styles.sectionTitle}>
-									Pencarian Terkini
-								</Text>
-								<View style={styles.recentSearches}>
-									{recentSearches.map((search, index) => (
-										<Pressable
-											key={index}
-											style={styles.recentSearchItem}
-											onPress={() =>
-												handleRecentSearch(search)
-											}>
-											<Feather
-												name="clock"
-												size={14}
-												color="#6B7280"
-											/>
-											<Text
-												style={styles.recentSearchText}>
-												{search}
-											</Text>
-										</Pressable>
-									))}
-								</View>
-							</View>
-						)}
-
-						{/* Popular Destinations */}
-						<View style={styles.section}>
-							<Text style={styles.sectionTitle}>
-								Destinasi Populer
-							</Text>
-							{popularDestinations.map((item, index) => (
-								<PopularDestinationItem
-									key={index}
-									item={item}
-								/>
-							))}
-						</View>
-
-						{/* Quick Actions */}
-						<View style={styles.section}>
-							<Text style={styles.sectionTitle}>
-								Jelajahi Berdasarkan
-							</Text>
-							<View style={styles.quickActions}>
-								<Pressable style={styles.quickActionCard}>
-									<LinearGradient
-										colors={["#EF4444", "#DC2626"]}
-										style={styles.quickActionGradient}>
-										<Feather
-											name="bookmark"
-											size={24}
-											color="#fff"
-										/>
-									</LinearGradient>
-									<Text style={styles.quickActionText}>
-										Bookmark Tinggi
-									</Text>
-								</Pressable>
-
-								<Pressable style={styles.quickActionCard}>
-									<LinearGradient
-										colors={["#F59E0B", "#D97706"]}
-										style={styles.quickActionGradient}>
-										<Feather
-											name="star"
-											size={24}
-											color="#fff"
-										/>
-									</LinearGradient>
-									<Text style={styles.quickActionText}>
-										Rating Tinggi
-									</Text>
-								</Pressable>
-
-								<Pressable style={styles.quickActionCard}>
-									<LinearGradient
-										colors={["#8B5CF6", "#7C3AED"]}
-										style={styles.quickActionGradient}>
-										<Feather
-											name="map-pin"
-											size={24}
-											color="#fff"
-										/>
-									</LinearGradient>
-									<Text style={styles.quickActionText}>
-										Terdekat
-									</Text>
-								</Pressable>
-							</View>
-						</View>
 					</>
 				) : (
 					// Search results
